@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ assistant.name }} - Soulbit AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
+    <style>
+        :root {
+            --primary: #8B5FBF; --primary-glow: #9D6BCC; --secondary: #FF6B8B;
+            --accent: #00D4FF; --dark: #0F0B1D; --darker: #090614;
+            --text: #FFFFFF; --text-secondary: #B8B5C9; --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--darker); color: var(--text); font-family: 'Poppins', sans-serif; height: 100vh; overflow: hidden; }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: radial-gradient(at 20% 20%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(339, 78%, 51%, 0.3) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(202, 100%, 50%, 0.3) 0px, transparent 50%), radial-gradient(at 80% 100%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%); }
+
+        .app-container { display: flex; height: 100vh; }
+        .sidebar { width: 300px; background: var(--glass); backdrop-filter: blur(20px); border-right: 1px solid var(--glass-border); display: flex; flex-direction: column; transition: transform 0.3s ease; }
+        .sidebar-header { padding: 20px; border-bottom: 1px solid var(--glass-border); }
+        .new-chat-btn { width: 100%; background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; padding: 12px; border-radius: 10px; color: var(--text); font-family: 'Orbitron', sans-serif; font-weight: 500; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .new-chat-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139, 95, 191, 0.4); }
+        .conversations-section { flex: 1; padding: 15px; overflow-y: auto; }
+        .section-title { font-family: 'Orbitron', sans-serif; font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        .conversations-list { display: flex; flex-direction: column; gap: 5px; }
+        
+        .conversation-item { padding: 10px 15px; border-radius: 10px; transition: all 0.3s ease; display: flex; align-items: center; gap: 10px; border: 1px solid transparent; position: relative; }
+        .conversation-item:hover { background: rgba(255, 255, 255, 0.05); }
+        .conversation-item.active { background: rgba(139, 95, 191, 0.2); border-color: var(--primary-glow); }
+        .conversation-content { flex: 1; cursor: pointer; display: flex; align-items: center; gap: 10px; min-width: 0; }
+        .conversation-icon { width: 20px; height: 20px; background: linear-gradient(45deg, var(--primary), var(--accent)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.7rem; flex-shrink: 0; }
+        .conversation-info { flex: 1; min-width: 0; }
+        .conversation-title { font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .conversation-date { font-size: 0.7rem; color: var(--text-secondary); }
+        .conversation-actions { position: relative; }
+        .action-menu-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 5px; border-radius: 50%; transition: background 0.2s; opacity: 0; }
+        .conversation-item:hover .action-menu-btn, .conversation-item.active .action-menu-btn { opacity: 1; }
+        .action-dropdown { display: none; position: absolute; right: 0; top: 25px; background: var(--dark); border: 1px solid var(--glass-border); border-radius: 8px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); z-index: 10; overflow: hidden; width: 160px;}
+        .action-dropdown.show { display: block; }
+        .action-dropdown button { background: none; border: none; color: var(--text-secondary); padding: 8px 15px; width: 100%; text-align: left; cursor: pointer; transition: background 0.2s; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;}
+        .action-dropdown button:hover { background: var(--primary); color: var(--text); }
+        .action-dropdown .delete-btn:hover { background: var(--secondary); }
+
+        .chat-area { flex: 1; display: flex; flex-direction: column; position: relative; }
+        .chat-header { padding: 15px 25px; backdrop-filter: blur(10px); background: var(--glass); border-bottom: 1px solid var(--glass-border); display: flex; justify-content: space-between; align-items: center; z-index: 10; }
+        .assistant-info { display: flex; align-items: center; gap: 15px; }
+        .assistant-avatar { width: 40px; height: 40px; background: linear-gradient(45deg, var(--primary), var(--accent)); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+        .assistant-details h2 { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; margin-bottom: 2px; }
+        .assistant-details p { color: var(--text-secondary); font-size: 0.8rem; }
+        .header-actions { display: flex; gap: 10px; }
+        .header-btn { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); padding: 8px 15px; border-radius: 20px; color: var(--text); text-decoration: none; font-size: 0.8rem; transition: all 0.3s ease; display: flex; align-items: center; gap: 5px; }
+        .header-btn:hover { background: rgba(255, 255, 255, 0.1); transform: translateY(-1px); }
+        
+        .messages-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 20px; }
+        .message { display: flex; gap: 15px; max-width: 80%; animation: messageAppear 0.3s ease; }
+        @keyframes messageAppear { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .message.user { flex-direction: row-reverse; align-self: flex-end; }
+        .message.ai { align-self: flex-start; }
+        .message-avatar { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .message-avatar.user { background: linear-gradient(45deg, var(--secondary), #FF8BA0); }
+        .message-avatar.ai { background: linear-gradient(45deg, var(--primary), var(--accent)); }
+        .message-content { background: var(--glass); border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px; position: relative; }
+        .message.user .message-content { background: rgba(139, 95, 191, 0.2); border-color: rgba(139, 95, 191, 0.3); border-bottom-right-radius: 5px; }
+        .message.ai .message-content { background: rgba(255, 255, 255, 0.05); border-color: var(--glass-border); border-bottom-left-radius: 5px; }
+        .message-text { line-height: 1.6; word-wrap: break-word; }
+        
+        .message-text pre { position: relative; background: var(--darker); padding: 15px; border-radius: 8px; margin: 1em 0; overflow-x: auto; font-family: monospace; }
+        .message-text code { font-family: monospace; background: none !important; }
+        .copy-code-btn { position: absolute; top: 10px; right: 10px; background: rgba(255,255,255,0.1); border: 1px solid var(--glass-border); color: var(--text-secondary); padding: 5px 10px; border-radius: 5px; cursor: pointer; transition: all 0.2s ease; opacity: 0; }
+        .message-text pre:hover .copy-code-btn { opacity: 1; }
+        .copy-code-btn:hover { background: var(--primary); color: var(--text); }
+        .copy-code-btn.copied { background: #00d455; color: var(--darker); }
+
+        .input-container { padding: 20px; border-top: 1px solid var(--glass-border); background: var(--glass); backdrop-filter: blur(20px); z-index: 10;}
+        .input-wrapper { max-width: 100%; margin: 0 auto; }
+        .document-selector { background: var(--darker); border: 1px solid var(--glass-border); border-radius: 15px; padding: 15px; margin-bottom: 15px; max-height: 200px; overflow-y: auto; }
+        .document-option { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 8px; cursor: pointer; transition: background 0.3s ease; }
+        .document-option:hover { background: rgba(255, 255, 255, 0.05); }
+        .selected-documents { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+        .selected-doc { background: linear-gradient(45deg, var(--primary), var(--secondary)); padding: 6px 12px; border-radius: 15px; font-size: 0.8rem; display: flex; align-items: center; gap: 5px; }
+        
+        .message-input-wrapper { display: flex; align-items: flex-end; gap: 10px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 20px; padding: 10px 15px; }
+        .file-upload-btn { background: transparent; border: none; color: var(--text-secondary); cursor: pointer; padding: 8px; border-radius: 50%; transition: all 0.3s ease; flex-shrink: 0; }
+        .message-input { flex: 1; border: none; background: transparent; color: var(--text); font-size: 1rem; resize: none; max-height: 120px; min-height: 24px; outline: none; font-family: 'Poppins', sans-serif; }
+        .send-button { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; width: 40px; height: 40px; border-radius: 50%; color: var(--text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; flex-shrink: 0; }
+        .send-button:disabled { opacity: 0.5; cursor: not-allowed; }
+        
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-glow); border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    
+    <div class="app-container">
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="{{ url_for('chat', assistant_id=assistant.id) }}" class="new-chat-btn"><i class="fas fa-plus"></i> Yeni Sohbet</a>
+            </div>
+            <div class="conversations-section">
+                <h3 class="section-title">Sohbet Geçmişi</h3>
+                <div class="conversations-list" id="conversationsList">
+                    {% include '_conversation_list.html' %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-area">
+            <div class="chat-header">
+                <div class="assistant-info">
+                    <div class="assistant-avatar"><i class="fas fa-robot"></i></div>
+                    <div class="assistant-details">
+                        <h2>{{ assistant.name }}</h2>
+                        <p>{{ assistant.description or "Kişisel AI asistanınız" }}</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <a href="{{ url_for('dashboard') }}" class="header-btn"><i class="fas fa-th-large"></i> Panele Dön</a>
+                    <a href="{{ url_for('edit_assistant', assistant_id=assistant.id) }}" class="header-btn"><i class="fas fa-cog"></i> Ayarlar</a>
+                </div>
+            </div>
+            
+            <div class="messages-container" id="messagesContainer">
+                {% if not messages %}
+                <div style="text-align:center; margin: auto; color: var(--text-secondary);">
+                    <i class="fas fa-robot" style="font-size: 4rem; opacity: 0.5;"></i>
+                    <h3 style="font-family: 'Orbitron'; margin-top: 1rem;">Sohbete Başla</h3>
+                    <p>Aşağıdaki alana mesajınızı yazarak {{ assistant.name }} ile konuşmaya başlayın.</p>
+                </div>
+                {% endif %}
+                {% for message in messages %}
+                <div class="message {% if message.is_user %}user{% else %}ai{% endif %}">
+                    <div class="message-avatar {% if message.is_user %}user{% else %}ai{% endif %}">
+                        <i class="fas fa-{% if message.is_user %}user-astronaut{% else %}robot{% endif %}"></i>
+                    </div>
+                    <div class="message-content">
+                        <div class="message-text" data-raw-content="{{ message.content }}"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="input-container">
+                <div class="input-wrapper">
+                    <div class="document-selector" id="documentSelector" style="display: none;">
+                        <div style="margin-bottom: 10px; font-weight: bold; display: flex; justify-content: space-between; align-items: center;">
+                            <span>Mesaja Dosya Ekle:</span>
+                            <button onclick="document.getElementById('fileUploadInput').click()" style="background: var(--primary); border: none; padding: 5px 10px; border-radius: 5px; color: white; cursor: pointer; font-size: 0.8rem;"><i class="fas fa-upload"></i> Yeni Yükle</button>
+                        </div>
+                        <div id="documentsList"></div>
+                    </div>
+                    <div class="selected-documents" id="selectedDocuments"></div>
+                    
+                    <input type="file" id="fileUploadInput" accept=".pdf,.txt,.docx" style="display: none;" onchange="uploadAndSelectFile(this.files[0])">
+
+                    <div class="message-input-wrapper">
+                        <label for="fileUploadInput" class="file-upload-btn" title="Dosya ekle">
+                            <i class="fas fa-paperclip"></i>
+                        </label>
+                        <textarea class="message-input" id="messageInput" placeholder="Mesajınızı yazın..." rows="1"></textarea>
+                        <button class="send-button" id="sendButton">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script>
+        let currentConversationId = {{ conversation_id or 'null' }};
+        let selectedDocuments = new Set();
+        let isWaitingForResponse = false;
+        
+        async function updateConversationList() {
+            try {
+                const response = await fetch(`{{ url_for('get_conversations', assistant_id=assistant.id) }}`);
+                if (response.ok) {
+                    document.getElementById('conversationsList').innerHTML = await response.text();
+                }
+            } catch (error) { console.error("Sohbet listesi güncellenemedi:", error); }
+        }
+
+        function toggleActionMenu(button, event) {
+            event.stopPropagation();
+            const dropdown = button.nextElementSibling;
+            document.querySelectorAll('.action-dropdown.show').forEach(menu => {
+                if (menu !== dropdown) menu.classList.remove('show');
+            });
+            dropdown.classList.toggle('show');
+        }
+
+        window.onclick = (event) => {
+            if (!event.target.matches('.action-menu-btn') && !event.target.closest('.action-menu-btn')) {
+                document.querySelectorAll('.action-dropdown.show').forEach(menu => menu.classList.remove('show'));
+            }
+        };
+
+        async function renameConversation(conversationId) {
+            const newTitle = prompt("Sohbet için yeni bir başlık girin:");
+            if (newTitle && newTitle.trim()) {
+                const response = await fetch(`/conversation/${conversationId}/rename`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title: newTitle.trim() })
+                });
+                if (response.ok) {
+                    document.querySelector(`.conversation-item[data-id='${conversationId}'] .conversation-title`).textContent = newTitle.trim();
+                } else { alert('Hata: Sohbet yeniden adlandırılamadı.'); }
+            }
+        }
+
+        async function deleteConversation(conversationId) {
+            if (confirm("Bu sohbeti kalıcı olarak silmek istediğinizden emin misiniz?")) {
+                const response = await fetch(`/conversation/${conversationId}/delete`, { method: 'DELETE' });
+                if (response.ok) {
+                    document.querySelector(`.conversation-item[data-id='${conversationId}']`)?.remove();
+                    if (currentConversationId === conversationId) newChat();
+                } else { alert('Hata: Sohbet silinemedi.'); }
+            }
+        }
+
+        function addCopyButtons(container) {
+            container.querySelectorAll('pre').forEach(block => {
+                if (block.querySelector('.copy-code-btn')) return;
+                const button = document.createElement('button');
+                button.className = 'copy-code-btn';
+                button.innerHTML = '<i class="fas fa-copy"></i> Kopyala';
+                button.onclick = () => copyCode(button, block.querySelector('code').innerText);
+                block.appendChild(button);
+            });
+        }
+
+        function copyCode(button, text) {
+            navigator.clipboard.writeText(text).then(() => {
+                button.innerHTML = '<i class="fas fa-check"></i> Kopyalandı!';
+                setTimeout(() => { button.innerHTML = '<i class="fas fa-copy"></i> Kopyala'; }, 2000);
+            });
+        }
+
+        function renderAllMessages() {
+            document.querySelectorAll('.message-text').forEach(el => {
+                const rawContent = el.dataset.rawContent;
+                if (rawContent) {
+                    el.innerHTML = marked.parse(rawContent);
+                    el.querySelectorAll('pre code').forEach(hljs.highlightElement);
+                    addCopyButtons(el);
+                }
+            });
+            document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
+        }
+
+        function addMessageToUI(message, isUser, documents = []) {
+            const container = document.getElementById('messagesContainer');
+            container.querySelector('div[style*="text-align:center"]')?.remove();
+
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${isUser ? 'user' : 'ai'}`;
+            const safeUserMessage = message.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/\n/g, '<br>');
+
+            let documentsHTML = '';
+            if (isUser && documents.length > 0) {
+                 fetch(`/get_documents/{{ assistant.id }}`)
+                   .then(res => res.json())
+                   .then(data => {
+                        const docTags = documents.map(docId => {
+                            const docInfo = data.documents.find(d => d.id === docId);
+                            if (docInfo) return `<div class="document-tag"><i class="fas fa-file-${getFileIcon(docInfo.filetype)}"></i> ${docInfo.filename}</div>`;
+                        }).join('');
+                        messageDiv.querySelector('.attached-documents').innerHTML = docTags;
+                   });
+                documentsHTML = `<div class="attached-documents"></div>`;
+            }
+
+            messageDiv.innerHTML = `
+                <div class="message-avatar ${isUser ? 'user' : 'ai'}"><i class="fas fa-${isUser ? 'user-astronaut' : 'robot'}"></i></div>
+                <div class="message-content">
+                    <div class="message-text">${isUser ? safeUserMessage : ''}</div>
+                    ${documentsHTML}
+                </div>`;
+            container.appendChild(messageDiv);
+            container.scrollTop = container.scrollHeight;
+            return messageDiv;
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            if (!message || isWaitingForResponse) return;
+            
+            const wasNewConversation = !currentConversationId;
+            addMessageToUI(message, true, Array.from(selectedDocuments));
+            input.value = '';
+            autoResize(input);
+            
+            isWaitingForResponse = true;
+            updateSendButtonState();
+            
+            const aiMessageContainer = addMessageToUI('', false);
+            const aiMessageTextElement = aiMessageContainer.querySelector('.message-text');
+
+            try {
+                const response = await fetch('{{ url_for("chat", assistant_id=assistant.id) }}', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: message, conversation_id: currentConversationId, attached_documents: Array.from(selectedDocuments) })
+                });
+
+                if (!response.ok) throw new Error(`Sunucu hatası: ${response.status}`);
+
+                const newConvId = response.headers.get('X-Conversation-Id');
+                if (wasNewConversation && newConvId) {
+                    currentConversationId = parseInt(newConvId);
+                    history.pushState({}, '', `?conversation_id=${currentConversationId}`);
+                }
+
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let accumulatedText = "";
+                
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    accumulatedText += decoder.decode(value, { stream: true });
+                    aiMessageTextElement.innerHTML = marked.parse(accumulatedText);
+                    document.getElementById('messagesContainer').scrollTop = document.getElementById('messagesContainer').scrollHeight;
+                }
+                
+                addCopyButtons(aiMessageTextElement);
+                aiMessageTextElement.querySelectorAll('pre code').forEach(hljs.highlightElement);
+
+                if (wasNewConversation) {
+                    await updateConversationList();
+                }
+
+            } catch (error) {
+                aiMessageTextElement.innerHTML = marked.parse("⚠️ Cevap alınırken bir hata oluştu.");
+            } finally {
+                isWaitingForResponse = false;
+                updateSendButtonState();
+                selectedDocuments.clear();
+                updateSelectedDocumentsUI();
+            }
+        }
+        
+        // --- Dosya Yükleme Fonksiyonları ---
+        function toggleDocumentSelector() {
+            const selector = document.getElementById('documentSelector');
+            selector.style.display = selector.style.display === 'none' ? 'block' : 'none';
+            if (selector.style.display === 'block') { loadDocuments(); }
+        }
+
+        async function loadDocuments() {
+            const response = await fetch(`/get_documents/{{ assistant.id }}`);
+            const data = await response.json();
+            const container = document.getElementById('documentsList');
+            container.innerHTML = '';
+            if (data.documents.length === 0) {
+                container.innerHTML = '<div style="text-align: center; color: var(--text-secondary); padding: 10px;">Yüklü dosya yok.</div>';
+                return;
+            }
+            data.documents.forEach(doc => {
+                container.innerHTML += `
+                    <div class="document-option">
+                        <input type="checkbox" id="doc-${doc.id}" ${selectedDocuments.has(doc.id) ? 'checked' : ''} onchange="toggleDocumentSelection(${doc.id})">
+                        <label for="doc-${doc.id}" style="cursor: pointer;"><i class="fas fa-file-${getFileIcon(doc.filetype)}"></i> ${doc.filename}</label>
+                    </div>`;
+            });
+        }
+        
+        function toggleDocumentSelection(docId) {
+            if (selectedDocuments.has(docId)) { selectedDocuments.delete(docId); } 
+            else { selectedDocuments.add(docId); }
+            updateSelectedDocumentsUI();
+        }
+
+        async function updateSelectedDocumentsUI() {
+            const container = document.getElementById('selectedDocuments');
+            container.style.display = selectedDocuments.size > 0 ? 'flex' : 'none';
+            if(selectedDocuments.size === 0) return;
+
+            const response = await fetch(`/get_documents/{{ assistant.id }}`);
+            const data = await response.json();
+            container.innerHTML = '';
+            selectedDocuments.forEach(docId => {
+                const docInfo = data.documents.find(d => d.id === docId);
+                if(docInfo) {
+                    container.innerHTML += `<div class="selected-doc"><span>${docInfo.filename}</span><i class="fas fa-times" onclick="removeDocumentSelection(${docId})"></i></div>`;
+                }
+            });
+        }
+
+        function removeDocumentSelection(docId) {
+            selectedDocuments.delete(docId);
+            const checkbox = document.getElementById(`doc-${docId}`);
+            if (checkbox) checkbox.checked = false;
+            updateSelectedDocumentsUI();
+        }
+
+        async function uploadAndSelectFile(file) {
+            if (!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            try {
+                const response = await fetch('{{ url_for("upload_document", assistant_id=assistant.id) }}', { method: 'POST', body: formData });
+                const data = await response.json();
+                if(data.document_id) {
+                    // Dosya yüklendikten sonra artık paneli açmıyoruz, ama seçili hale getirebiliriz.
+                    // Şimdilik sadece yükleme işlemini yapması yeterli. 
+                    // İsterseniz otomatik seçili hale de getirebiliriz.
+                    alert(`'${file.name}' başarıyla yüklendi!`);
+                    // İsterseniz aşağıdaki fonksiyonları çağırarak dosyayı seçili hale getirebilirsiniz.
+                    // await loadDocuments(); 
+                    // if (!selectedDocuments.has(data.document_id)) { toggleDocumentSelection(data.document_id); }
+                } else { alert('Hata: ' + data.error); }
+            } catch (error) { alert('Dosya yükleme hatası: ' + error); }
+        }
+        
+        function getFileIcon(filetype) {
+            return { 'pdf': 'pdf', 'txt': 'alt', 'docx': 'word' }[filetype] || 'file';
+        }
+        
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+        }
+
+        function updateSendButtonState() {
+            const btn = document.getElementById('sendButton');
+            const input = document.getElementById('messageInput');
+            btn.disabled = isWaitingForResponse || input.value.trim() === '';
+        }
+
+        function newChat() {
+            window.location.href = '{{ url_for("chat", assistant_id=assistant.id) }}';
+        }
+        
+        function loadConversation(conversationId) {
+            window.location.href = `{{ url_for("chat", assistant_id=assistant.id) }}?conversation_id=${conversationId}`;
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            renderAllMessages();
+            const messageInput = document.getElementById('messageInput');
+            const sendButton = document.getElementById('sendButton');
+            messageInput.addEventListener('input', () => { autoResize(messageInput); updateSendButtonState(); });
+            messageInput.addEventListener('keydown', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } });
+            sendButton.addEventListener('click', sendMessage);
+            updateSendButtonState();
+        });
+    </script>
+</body>
+</html>

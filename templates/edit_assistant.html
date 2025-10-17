@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ assistant.name }} Ayarları - Soulbit AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B5FBF; --primary-glow: #9D6BCC; --secondary: #FF6B8B;
+            --accent: #00D4FF; --dark: #0F0B1D; --darker: #090614;
+            --text: #FFFFFF; --text-secondary: #B8B5C9; --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: var(--darker); color: var(--text); font-family: 'Poppins', sans-serif; min-height: 100vh; }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: radial-gradient(at 20% 20%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(339, 78%, 51%, 0.3) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(202, 100%, 50%, 0.3) 0px, transparent 50%), radial-gradient(at 80% 100%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%); }
+
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; backdrop-filter: blur(10px); background: var(--glass); border-bottom: 1px solid var(--glass-border); }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 700; text-decoration: none; color: var(--text); }
+        .logo span { color: var(--primary); }
+        .back-btn { color: var(--text-secondary); text-decoration: none; display: flex; align-items: center; gap: 8px; transition: color 0.3s ease; }
+        .back-btn:hover { color: var(--text); }
+        
+        .form-container { display: flex; justify-content: center; align-items: center; padding: 40px 20px; }
+        .form-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; width: 100%; max-width: 800px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); }
+        .form-card .card-title { font-family: 'Orbitron', sans-serif; font-size: 2rem; text-align: center; margin-bottom: 30px; }
+        
+        .form-group { margin-bottom: 25px; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500; }
+        .form-input, .form-textarea { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 10px; color: var(--text); font-size: 1rem; transition: all 0.3s ease; font-family: 'Poppins', sans-serif; }
+        .form-textarea { resize: vertical; min-height: 150px; }
+        .form-input:focus, .form-textarea:focus { outline: none; border-color: var(--primary-glow); box-shadow: 0 0 20px rgba(139, 95, 191, 0.3); }
+        
+        .form-actions { display: flex; gap: 15px; justify-content: flex-end; margin-top: 30px; }
+        .btn { padding: 12px 30px; border-radius: 50px; text-decoration: none; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border: none; font-size: 1rem; }
+        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: var(--text); }
+        .btn-secondary { background: transparent; color: var(--text-secondary); border: 1px solid var(--glass-border); }
+        .btn:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(139, 95, 191, 0.3); }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}" class="logo">Soulbit<span>AI</span></a>
+        <a href="{{ url_for('assistant_detail', assistant_id=assistant.id) }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i> Asistan Detaylarına Dön
+        </a>
+    </nav>
+    <div class="form-container">
+        <div class="form-card">
+            <h1 class="card-title">"{{ assistant.name }}" Ayarları</h1>
+            <form method="POST">
+                <div class="form-group">
+                    <label for="name">Asistan Adı</label>
+                    <input type="text" id="name" name="name" class="form-input" value="{{ assistant.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label for="description">Açıklama</label>
+                    <input type="text" id="description" name="description" class="form-input" value="{{ assistant.description or '' }}">
+                </div>
+                <div class="form-group">
+                    <label for="instructions">Özel Talimatlar (Asistan Kişiliği)</label>
+                    <textarea id="instructions" name="instructions" class="form-textarea" placeholder="Örn: Sen esprili bir pazarlama metin yazarısın. Cevaplarını her zaman 3 maddelik özetler halinde ver.">{{ assistant.instructions or '' }}</textarea>
+                    <small style="color: var(--text-secondary); margin-top: 5px; display: block;">Bu alana yazdığınız talimatlar, asistanınızın nasıl cevap vereceğini, kişiliğini ve tonunu belirler.</small>
+                </div>
+                <div class="form-actions">
+                    <a href="{{ url_for('assistant_detail', assistant_id=assistant.id) }}" class="btn btn-secondary">İptal</a>
+                    <button type="submit" class="btn btn-primary">Değişiklikleri Kaydet</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

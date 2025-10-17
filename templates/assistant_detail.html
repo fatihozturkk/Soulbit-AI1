@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ assistant.name }} - Soulbit AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B5FBF;
+            --primary-glow: #9D6BCC;
+            --secondary: #FF6B8B;
+            --accent: #00D4FF;
+            --dark: #0F0B1D;
+            --darker: #090614;
+            --text: #FFFFFF;
+            --text-secondary: #B8B5C9;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { background: var(--darker); color: var(--text); font-family: 'Poppins', sans-serif; min-height: 100vh; position: relative; }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: radial-gradient(at 20% 20%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(339, 78%, 51%, 0.3) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(202, 100%, 50%, 0.3) 0px, transparent 50%), radial-gradient(at 80% 100%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%); }
+
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; backdrop-filter: blur(10px); background: var(--glass); border-bottom: 1px solid var(--glass-border); }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 700; text-decoration: none; color: var(--text); }
+        .logo span { color: var(--primary); }
+        .nav-actions { display: flex; gap: 15px; }
+        .nav-btn { padding: 10px 20px; border-radius: 20px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; }
+        .nav-btn.primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: var(--text); }
+        .nav-btn.secondary { background: rgba(255, 255, 255, 0.05); border: 1px solid var(--glass-border); color: var(--text); }
+        .nav-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139, 95, 191, 0.4); }
+
+        .container { max-width: 1400px; margin: 0 auto; padding: 40px 20px; }
+        
+        .assistant-header { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 30px; margin-bottom: 40px; }
+        .assistant-info { display: flex; align-items: flex-start; gap: 20px; margin-bottom: 20px; }
+        .assistant-avatar { width: 80px; height: 80px; background: linear-gradient(45deg, var(--primary), var(--accent)); border-radius: 20px; display: flex; align-items: center; justify-content: center; font-size: 2rem; flex-shrink: 0; }
+        .assistant-details h1 { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; margin-bottom: 5px; }
+        .assistant-description { color: var(--text-secondary); font-size: 1.1rem; line-height: 1.5; margin-bottom: 20px; }
+        
+        .header-actions { display: flex; gap: 15px; flex-wrap: wrap; }
+        .action-btn { padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; border: none; cursor: pointer; font-size: 0.9rem; }
+        .btn-primary { background: linear-gradient(45deg, var(--primary), var(--secondary)); color: var(--text); }
+        .btn-secondary { background: rgba(255, 255, 255, 0.1); color: var(--text); }
+        .btn-danger { background: rgba(255, 107, 139, 0.2); color: #FF6B8B; border: 1px solid #FF6B8B; }
+        .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139, 95, 191, 0.3); }
+
+        .sections-container { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 30px; }
+        .section { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 25px; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid var(--glass-border); }
+        .section-title { font-family: 'Orbitron', sans-serif; font-size: 1.3rem; }
+        
+        .item-list { display: flex; flex-direction: column; gap: 15px; max-height: 400px; overflow-y: auto; padding-right: 10px; }
+        .list-item { display: flex; align-items: center; gap: 15px; padding: 15px; background: rgba(0,0,0,0.2); border-radius: 12px; transition: all 0.3s ease; text-decoration: none; color: var(--text); }
+        .list-item:hover { background: rgba(139, 95, 191, 0.1); transform: translateX(5px); }
+        .item-icon { width: 40px; height: 40px; background: linear-gradient(45deg, var(--primary), var(--accent)); border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .item-info { flex-grow: 1; min-width: 0; }
+        .item-title { font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+        .item-meta { font-size: 0.8rem; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .item-actions .icon-btn { width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center; background: transparent; border: 1px solid var(--glass-border); color: var(--text-secondary); cursor: pointer; transition: all 0.3s ease; }
+        .item-actions .icon-btn:hover { background: rgba(255, 107, 139, 0.2); border-color: var(--secondary); color: var(--secondary); transform: scale(1.1); }
+        
+        .upload-area { border: 2px dashed var(--glass-border); border-radius: 15px; padding: 30px; text-align: center; transition: all 0.3s ease; cursor: pointer; margin-bottom: 20px; }
+        .upload-area:hover { border-color: var(--primary-glow); background: rgba(139, 95, 191, 0.05); }
+        .upload-icon { font-size: 2.5rem; margin-bottom: 15px; color: var(--primary); }
+        
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+        .empty-icon { font-size: 3rem; margin-bottom: 15px; opacity: 0.5; }
+
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--primary-glow); border-radius: 3px; }
+
+        @media (max-width: 768px) {
+            .navbar { padding: 15px 20px; }
+            .assistant-info { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}" class="logo">Soulbit<span>AI</span></a>
+        <div class="nav-actions">
+            <a href="{{ url_for('dashboard') }}" class="nav-btn secondary"><i class="fas fa-arrow-left"></i> Kontrol Paneli</a>
+            <a href="{{ url_for('chat', assistant_id=assistant.id) }}" class="nav-btn primary"><i class="fas fa-comments"></i> Yeni Sohbet</a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="assistant-header">
+            <div class="assistant-info">
+                <div class="assistant-avatar"><i class="fas fa-robot"></i></div>
+                <div class="assistant-details">
+                    <h1>{{ assistant.name }}</h1>
+                    <p class="assistant-description">{{ assistant.description or "Açıklama eklenmemiş." }}</p>
+                </div>
+            </div>
+             <div class="header-actions">
+                <a href="{{ url_for('edit_assistant', assistant_id=assistant.id) }}" class="action-btn btn-secondary">
+                    <i class="fas fa-edit"></i> Asistanı Düzenle
+                </a>
+                </div>
+        </div>
+        
+        <div class="sections-container">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">📁 Yüklenen Dosyalar</h2>
+                </div>
+                
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+                    <p>Dosyaları buraya sürükleyin veya tıklayarak seçin</p>
+                    <small style="color: var(--text-secondary);">Desteklenen formatlar: PDF, TXT, DOCX</small>
+                </div>
+                <input type="file" id="fileInput" style="display: none;" accept=".pdf,.txt,.docx" onchange="uploadFile(this.files[0])">
+                
+                <div class="item-list">
+                    {% for document in documents %}
+                    <div class="list-item">
+                        <div class="item-icon">
+                            <i class="fas fa-file-{{ 'pdf' if document.filetype == 'pdf' else 'word' if document.filetype == 'docx' else 'alt' if document.filetype == 'txt' else 'file' }}"></i>
+                        </div>
+                        <div class="item-info">
+                            <div class="item-title">{{ document.filename }}</div>
+                            <div class="item-meta">{{ (document.file_size / 1024)|round(1) }} KB • {{ document.uploaded_at.strftime('%d.%m.%Y') }}</div>
+                        </div>
+                        <div class="item-actions">
+                            <button class="icon-btn" onclick="deleteDocument({{ document.id }})" title="Sil"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-file-circle-xmark"></i></div>
+                        <h3>Henüz dosya yüklenmedi</h3>
+                        <p>Bu asistana bilgi eklemek için dosya yükleyin.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">💬 Sohbet Geçmişi</h2>
+                </div>
+                <div class="item-list">
+                    {% for conversation in conversations %}
+                    <a href="{{ url_for('chat', assistant_id=assistant.id, conversation_id=conversation.id) }}" class="list-item">
+                        <div class="item-icon"><i class="fas fa-comment-dots"></i></div>
+                        <div class="item-info">
+                            <div class="item-title">{{ conversation.title }}</div>
+                            <div class="item-meta">{{ conversation.created_at.strftime('%d.%m.%Y %H:%M') }}</div>
+                        </div>
+                    </a>
+                    {% else %}
+                    <div class="empty-state">
+                        <div class="empty-icon"><i class="fas fa-comment-slash"></i></div>
+                        <h3>Henüz sohbet yok</h3>
+                        <p>Bu asistanla yeni bir sohbet başlatın.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function uploadFile(file) {
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('file', file);
+
+        // Dinamik olarak bir "Yükleniyor..." elemanı oluştur ve listeye ekle
+        const documentsList = document.querySelector('.documents-list');
+        const loadingItem = createPlaceholderItem(file.name);
+        documentsList.prepend(loadingItem);
+
+        fetch('{{ url_for("upload_document", assistant_id=assistant.id) }}', {
+            method: 'POST',
+            body: formData
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.document_id) {
+                // Yükleme başarılı, placeholder'ı gerçek veriyle güncelle
+                updatePlaceholderItem(loadingItem, data);
+            } else {
+                // Hata oluştu, placeholder'ı kaldır ve hata göster
+                loadingItem.remove();
+                alert('Hata: ' + data.error);
+            }
+        })
+        .catch(error => {
+            loadingItem.remove();
+            alert('Dosya yüklenirken bir hata oluştu: ' + error);
+        });
+    }
+
+    function createPlaceholderItem(fileName) {
+        const item = document.createElement('div');
+        item.className = 'document-item';
+        item.style.opacity = '0.5';
+        item.innerHTML = `
+            <div class="document-icon"><i class="fas fa-spinner fa-spin"></i></div>
+            <div class="document-info">
+                <div class="document-name">${fileName}</div>
+                <div class="document-meta">Yükleniyor...</div>
+            </div>
+        `;
+        return item;
+    }
+
+    function updatePlaceholderItem(placeholder, data) {
+        placeholder.style.opacity = '1';
+        const fileTypeIcon = { 'pdf': 'pdf', 'docx': 'word', 'txt': 'alt' }[data.filetype] || 'file';
+        placeholder.innerHTML = `
+            <div class="document-icon"><i class="fas fa-file-${fileTypeIcon}"></i></div>
+            <div class="document-info">
+                <div class="document-name">${data.filename}</div>
+                <div class="document-meta">
+                    ${((data.file_size || 0) / 1024).toFixed(1)} KB • Az önce
+                </div>
+            </div>
+            <div class="document-actions">
+                <button class="icon-btn" onclick="deleteDocument(${data.document_id})">
+                    <i class="fas fa-trash"></i>
+                </button>
+            </div>
+        `;
+    }
+
+    function deleteDocument(documentId) {
+        if (!confirm('Bu dosyayı kalıcı olarak silmek istediğinizden emin misiniz?')) return;
+        
+        const itemToDelete = document.querySelector(`.document-item[data-id='${documentId}']`);
+        if (itemToDelete) itemToDelete.style.opacity = '0.5';
+
+        fetch(`/delete_document/${documentId}`, {
+            method: 'DELETE'
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.message) {
+                itemToDelete?.remove();
+            } else {
+                alert('Hata: ' + data.error);
+                if (itemToDelete) itemToDelete.style.opacity = '1';
+            }
+        })
+        .catch(error => {
+            alert('Dosya silinirken bir hata oluştu: ' + error);
+            if (itemToDelete) itemToDelete.style.opacity = '1';
+        });
+    }
+
+    // Drag and Drop Fonksiyonları (Mevcut haliyle kalabilir)
+    document.addEventListener('DOMContentLoaded', function() {
+        // Her document-item'a bir data-id ekleyerek silme işlemini kolaylaştıralım
+        const docItems = document.querySelectorAll('.document-item');
+        docItems.forEach(item => {
+            const deleteBtn = item.querySelector('.icon-btn');
+            if(deleteBtn) {
+                const docId = deleteBtn.getAttribute('onclick').match(/\d+/)[0];
+                item.dataset.id = docId;
+            }
+        });
+
+        const uploadArea = document.querySelector('.file-upload-area');
+        if(uploadArea) {
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, e => { e.preventDefault(); e.stopPropagation(); }, false);
+            });
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = 'var(--primary-glow)', false);
+            });
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, () => uploadArea.style.borderColor = 'var(--glass-border)', false);
+            });
+            uploadArea.addEventListener('drop', e => {
+                const dt = e.dataTransfer;
+                if (dt.files.length > 0) {
+                    uploadFile(dt.files[0]);
+                }
+            }, false);
+        }
+    });
+        
+    </script>
+</body>
+</html>

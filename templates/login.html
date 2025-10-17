@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Giriş Yap - Soulbit AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B5FBF;
+            --primary-glow: #9D6BCC;
+            --secondary: #FF6B8B;
+            --accent: #00D4FF;
+            --dark: #0F0B1D;
+            --darker: #090614;
+            --text: #FFFFFF;
+            --text-secondary: #B8B5C9;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--darker);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: radial-gradient(at 20% 20%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(339, 78%, 51%, 0.3) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(202, 100%, 50%, 0.3) 0px, transparent 50%), radial-gradient(at 80% 100%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%); }
+
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; position: absolute; top: 0; left: 0; width: 100%; z-index: 100; }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 700; text-decoration: none; color: var(--text); }
+        .logo span { color: var(--primary); }
+        .auth-buttons { display: flex; gap: 15px; }
+        .auth-btn { padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; }
+        .auth-btn.register { background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; color: var(--text); }
+        .auth-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139, 95, 191, 0.4); }
+
+        .form-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+        .form-card { background: var(--glass); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 20px; padding: 40px; width: 100%; max-width: 450px; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3); text-align: center; }
+        .form-card .card-logo { font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 700; margin-bottom: 30px; background: linear-gradient(45deg, var(--primary), var(--accent)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        
+        .form-group { margin-bottom: 20px; text-align: left; }
+        .form-group label { display: block; margin-bottom: 8px; color: var(--text-secondary); font-weight: 500; }
+        .form-input { width: 100%; padding: 12px 15px; background: rgba(0,0,0,0.2); border: 1px solid var(--glass-border); border-radius: 10px; color: var(--text); font-size: 1rem; transition: all 0.3s ease; }
+        .form-input:focus { outline: none; border-color: var(--primary-glow); box-shadow: 0 0 20px rgba(139, 95, 191, 0.3); }
+        
+        .cta-button { width: 100%; background: linear-gradient(45deg, var(--primary), var(--secondary)); border: none; padding: 12px; border-radius: 10px; color: var(--text); font-family: 'Orbitron', sans-serif; font-weight: 500; font-size: 1rem; cursor: pointer; transition: all 0.3s ease; margin-top: 10px; }
+        .cta-button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(139, 95, 191, 0.4); }
+        
+        .links { margin-top: 20px; }
+        .links a { color: var(--accent); text-decoration: none; transition: color 0.3s ease; }
+        .links a:hover { text-decoration: underline; }
+        
+        .error-box { background: rgba(255, 107, 139, 0.2); border: 1px solid var(--secondary); padding: 15px; border-radius: 10px; margin-bottom: 20px; color: var(--text); }
+
+        @media (max-width: 500px) {
+            .navbar { padding: 20px 20px; }
+            .form-card { padding: 30px 25px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('index') }}" class="logo">Soulbit<span>AI</span></a>
+        <div class="auth-buttons">
+            <a href="{{ url_for('register') }}" class="auth-btn register">Kayıt Ol</a>
+        </div>
+    </nav>
+    
+    <div class="form-container">
+        <div class="form-card">
+            <div class="card-logo">Giriş Yap</div>
+            
+            {% if error %}
+            <div class="error-box">{{ error }}</div>
+            {% endif %}
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Kullanıcı Adı</label>
+                    <input type="text" id="username" name="username" class="form-input" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Şifre</label>
+                    <input type="password" id="password" name="password" class="form-input" required>
+                </div>
+                
+                <button type="submit" class="cta-button">
+                    <i class="fas fa-sign-in-alt"></i> Giriş Yap
+                </button>
+            </form>
+            
+            <div class="links">
+                <p style="color: var(--text-secondary);">Hesabın yok mu? <a href="{{ url_for('register') }}">Kayıt Ol</a></p>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

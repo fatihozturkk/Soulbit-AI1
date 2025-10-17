@@ -1,0 +1,25 @@
+{% for conversation in conversations %}
+<div class="conversation-item {% if conversation.id == conversation_id|int %}active{% endif %}" data-id="{{ conversation.id }}">
+    <div class="conversation-content" onclick="loadConversation({{ conversation.id }})">
+        <div class="conversation-icon"><i class="fas fa-comment"></i></div>
+        <div class="conversation-info">
+            <div class="conversation-title">{{ conversation.title }}</div>
+            <div class="conversation-date">{{ conversation.created_at.strftime('%d.%m.%Y') }}</div>
+        </div>
+    </div>
+    <div class="conversation-actions">
+        <button class="action-menu-btn" onclick="toggleActionMenu(this, event)">
+            <i class="fas fa-ellipsis-h"></i>
+        </button>
+        <div class="action-dropdown">
+            <button onclick="renameConversation({{ conversation.id }})"><i class="fas fa-pen"></i> Yeniden Adlandır</button>
+            <button class="delete-btn" onclick="deleteConversation({{ conversation.id }})"><i class="fas fa-trash"></i> Sil</button>
+        </div>
+    </div>
+</div>
+{% else %}
+<div style="text-align: center; color: var(--text-secondary); padding: 20px; font-size: 0.9rem;">
+    <i class="fas fa-comment-slash" style="font-size: 2rem; margin-bottom: 10px; opacity: 0.5;"></i>
+    <div>Henüz sohbet geçmişi yok</div>
+</div>
+{% endfor %}

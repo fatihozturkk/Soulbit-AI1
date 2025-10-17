@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kontrol Paneli - Soulbit AI</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #8B5FBF;
+            --primary-glow: #9D6BCC;
+            --secondary: #FF6B8B;
+            --accent: #00D4FF;
+            --dark: #0F0B1D;
+            --darker: #090614;
+            --text: #FFFFFF;
+            --text-secondary: #B8B5C9;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background: var(--darker);
+            color: var(--text);
+            font-family: 'Poppins', sans-serif;
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+        .bg-gradient { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; background-image: radial-gradient(at 20% 20%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%), radial-gradient(at 80% 0%, hsla(339, 78%, 51%, 0.3) 0px, transparent 50%), radial-gradient(at 0% 100%, hsla(202, 100%, 50%, 0.3) 0px, transparent 50%), radial-gradient(at 80% 100%, hsla(263, 54%, 25%, 0.4) 0px, transparent 50%); }
+
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 50px; backdrop-filter: blur(10px); background: var(--glass); border-bottom: 1px solid var(--glass-border); }
+        .logo { font-family: 'Orbitron', sans-serif; font-size: 1.8rem; font-weight: 700; text-decoration: none; color: var(--text); }
+        .logo span { color: var(--primary); }
+        
+        .user-menu { display: flex; align-items: center; gap: 15px; }
+        .user-info { color: var(--text-secondary); }
+        .logout-btn { background: transparent; border: 1px solid var(--primary); color: var(--text); padding: 10px 25px; border-radius: 25px; text-decoration: none; font-weight: 500; transition: all 0.3s ease; }
+        .logout-btn:hover { background: var(--primary); color: var(--darker); }
+
+        .container { max-width: 1200px; margin: 0 auto; padding: 40px 20px; }
+        
+        .dashboard-header {
+            background: var(--glass);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 40px;
+            text-align: center;
+        }
+        .dashboard-header h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, var(--text), var(--accent));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .dashboard-header p { color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 20px; }
+        
+        .create-assistant-btn {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            border: none; padding: 12px 30px; border-radius: 25px; color: var(--text);
+            font-family: 'Orbitron', sans-serif; font-weight: 500; text-decoration: none;
+            display: inline-block; transition: all 0.3s ease;
+        }
+        .create-assistant-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(139, 95, 191, 0.4); }
+
+        .assistants-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 30px; }
+        
+        .assistant-card {
+            background: var(--glass); backdrop-filter: blur(10px); border: 1px solid var(--glass-border);
+            border-radius: 15px; padding: 25px; text-decoration: none; color: var(--text);
+            transition: all 0.3s ease; display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .assistant-card:hover { transform: translateY(-5px); border-color: var(--primary-glow); box-shadow: 0 10px 30px rgba(139, 95, 191, 0.2); }
+        .assistant-card h2 { font-family: 'Orbitron', sans-serif; color: var(--primary); margin-bottom: 10px; font-size: 1.4rem; }
+        .assistant-card p { color: var(--text-secondary); flex-grow: 1; line-height: 1.6; }
+        .assistant-card .date { font-size: 0.8rem; color: var(--text-secondary); margin-top: 20px; opacity: 0.7; }
+        
+        .new-assistant-card {
+            justify-content: center; align-items: center; font-size: 1.2rem; font-weight: 600;
+            border-style: dashed; text-align: center;
+        }
+        .new-assistant-card i { font-size: 2.5rem; margin-bottom: 15px; }
+
+        .empty-state { text-align: center; padding: 40px 20px; color: var(--text-secondary); }
+        .empty-icon { font-size: 3rem; margin-bottom: 20px; opacity: 0.5; }
+    </style>
+</head>
+<body>
+    <div class="bg-gradient"></div>
+
+    <nav class="navbar">
+        <a href="{{ url_for('dashboard') }}" class="logo">Soulbit<span>AI</span></a>
+        <div class="user-menu">
+            <span class="user-info">Hoş geldin, {{ user.username }}!</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Çıkış
+            </a>
+        </div>
+    </nav>
+    
+    <div class="container">
+        <div class="dashboard-header">
+            <h1>Kontrol Paneli</h1>
+            <p>Mevcut asistanlarınızı yönetin veya yeni bir tane oluşturun.</p>
+        </div>
+        
+        <div class="assistants-grid">
+            {% for assistant in assistants %}
+                <a href="{{ url_for('assistant_detail', assistant_id=assistant.id) }}" class="assistant-card">
+                    <div>
+                        <h2>{{ assistant.name }}</h2>
+                        <p>{{ assistant.description or 'Açıklama eklenmemiş.' }}</p>
+                    </div>
+                    <p class="date">Oluşturulma: {{ assistant.created_at.strftime('%d.%m.%Y') }}</p>
+                </a>
+            {% endfor %}
+
+            <a href="{{ url_for('create_assistant') }}" class="assistant-card new-assistant-card">
+                <i class="fas fa-plus-circle"></i>
+                <span>Yeni Asistan Oluştur</span>
+            </a>
+        </div>
+
+        {% if not assistants %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-ghost"></i></div>
+                <h3>Henüz asistanınız yok</h3>
+                <p>İlk asistanınızı oluşturmak için yukarıdaki butona tıklayın.</p>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>
